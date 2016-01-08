@@ -26,7 +26,7 @@ For each participant finishing a race on our competition and for each sympathize
 // MATCH (a)-[r]->(b) WHERE labels(a) <> [] AND labels(b) <> []
 // RETURN DISTINCT head(labels(a)) AS This, type(r) as To, head(labels(b)) AS That LIMIT 10
 
-image::https://github.com/dirkv63/running/blob/master/Schema.svg[Schema]
+image::https://github.com/dirkv63/running/Schema.svg[Schema]
 
 //setup
 //hide

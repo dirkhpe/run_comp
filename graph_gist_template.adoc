@@ -87,8 +87,21 @@ CREATE
 //graph
 
 == Use the data
-Use cases: Get the list of finishers in the main race in sequence. This allows to add points to the finisher. Rankings will be maintained in SQL table for now.
-Count the number of finishers in the main race. Calculate the points for finishers in side races.
+Get the list of all finishers for a specific organization. 
+
+[source,cypher]
+----
+MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
+(d)-[:race_category]->(g:RaceType),
+(d)<-[:runs_in]-(e)<-[:participates]-(f)
+RETURN w,g,d,f,e
+----
+
+//graph_result
+
+//table
+
+Now we need to calculate points for the finishers. Therefore we need to get the finishers in main race first, in sequence of arrival.
 
 [source,cypher]
 ----

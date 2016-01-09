@@ -28,17 +28,49 @@ For each participant finishing a race on our competition and for each sympathize
 
 image::http://www.vermeylen.net/Schema.svg[Schema]
 
+== Add some data
+
+=== Participants
 //setup
 //hide
 [source,cypher]
 ----
 CREATE
-  (Person {name: 'Dré'}),
-  (b:Person {name: 'Louis'}),
-  (c:Person {name: 'Luc'}),
-  (d:Person {name: 'Dirk'}),
-  (e:Person {name: 'Johan'})
+	(a:Person {name: 'Dré'}),
+	(b:Person {name: 'Louis'}),
+	(c:Person {name: 'Luc'}),
+	(d:Person {name: 'Dirk'}),
+	(e:Person {name: 'Johan'})
 ----
+
+=== Some Organizations and races
+[source,cypher]
+----
+CREATE
+	(rtm1: RaceType {type: 'Main'}),
+	(rtm2: RaceType {type: 'Side'}),
+	(a:Organization {name: 'Lier - Halve Marathon'}),
+	(b:Race {label: '21k'}),
+	(c:Race {label: '10k'}),
+	(a)-->(b),
+	(a)-->(c),
+	(b)-->(rtm1),
+	(c)-->(rmt2),
+	(d:Organization {name: 'Deurne - Rivierenhofloop'}),
+	(dr1:Race {label: '10k'}),
+	(dr2:Race {label: '5k'}),
+	(d)-->(dr1),
+	(d)-->(dr2),
+	(dr1)-->(rtm1),
+	(dr2)-->(rtm2),
+	(e:Organization {name: 'Bercheme - Bollekesloop'}),
+	(er1:Race {label: '10k'}),
+	(er2:Race {label: '5k'}),
+	(e)-->(er1),
+	(e)-->(er2),
+	(er1)-->(rtm1),
+	(er2)-->(rtm2)
+
 
 // REMOVEME: Display the whole graph:
 
@@ -74,3 +106,5 @@ Rankings per race and overall rankings are stored in a SQL table. For now it is 
 However the rule implementations is a lot more flexible in Graph mode compared to traditional SQL representation. 
 The expectation with the Graph mode is that it will be easier to extend the model to include the crosses in the Winter competition. During winter there female / male split-up is extended to include age-ranges: Under-16 - Youth - Junior - Under-23 - Senior - Master - Master+50.
 Another extension would be to add points based on track and field disciplines.
+
+This Graphgist approach is very flexible to build prototypes. Next step is to build a flask website and start using the application.

@@ -84,6 +84,8 @@ CREATE
 	(dirk_f_c)-[dfc_dfc:after]->(dre_f_c)
 ----
 
+//graph_result
+
 == Use the data
 Use cases: Get the list of finishers in the main race in sequence. This allows to add points to the finisher. Rankings will be maintained in SQL table for now.
 Count the number of finishers in the main race. Calculate the points for finishers in side races.
@@ -97,7 +99,6 @@ RETURN w,d,e,f
 //graph_result
 
 //table
-
 
 Update finishers - switch positions, add participants on the fly
 Add participants that are not part of the main competition.

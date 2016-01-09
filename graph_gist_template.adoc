@@ -33,15 +33,11 @@ image::http://www.vermeylen.net/Schema.svg[Schema]
 [source,cypher]
 ----
 CREATE
-  (a:Person {name: 'Alice'}),
-  (b:Person {name: 'Bob'}),
-  (c:Person {name: 'Carrie'}),
-  (d:Person {name: 'David'}),
-  (e:Person {name: 'Emily'}),
-  (a)-[:FRIENDS_WITH]->(b),
-  (a)-[:FRIENDS_WITH]->(e),
-  (b)-[:FRIENDS_WITH]->(c),
-  (b)-[:FRIENDS_WITH]->(d)
+  (Person {name: 'Dré'}),
+  (b:Person {name: 'Louis'}),
+  (c:Person {name: 'Luc'}),
+  (d:Person {name: 'Dirk'}),
+  (e:Person {name: 'Johan'})
 ----
 
 // REMOVEME: Display the whole graph:

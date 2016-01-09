@@ -88,13 +88,15 @@ CREATE
 Use cases: Get the list of finishers in the main race in sequence. This allows to add points to the finisher. Rankings will be maintained in SQL table for now.
 Count the number of finishers in the main race. Calculate the points for finishers in side races.
 
-//setup
-//hide
 [source,cypher]
 ----
 MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d)<-[:runs_in]-(e)<-[:participates]-(f)
 RETURN w,d,e,f
 ----
+
+//graph_result
+
+//table
 
 
 Update finishers - switch positions, add participants on the fly

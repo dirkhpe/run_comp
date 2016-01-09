@@ -124,6 +124,7 @@ Let us try to add a path:
 MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
 (d)-[:race_category]->(g:RaceType {label: 'Main'}),
 p=(e)<-[:after*]-(f)
+WHERE (d)<-[:runs_in]-(e)
 RETURN p
 ----
 
@@ -131,6 +132,7 @@ RETURN p
 
 //table
 
+Will this work if there is only 1 participant? Or if there are no participants?
 
 Update finishers - switch positions, add participants on the fly
 Add participants that are not part of the main competition.

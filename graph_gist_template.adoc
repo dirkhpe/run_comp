@@ -87,7 +87,7 @@ CREATE
 	(dre_f_c)-[dre_f_cc:runs_in]->(c),
 	(louis_f_c)-[louis_f_cc:runs_in]->(c),
 	(luc_f_b)-[luc_f_bb:runs_in]->(b),
-	(dirk_f_cc)-[dirk_f_cc:runs_in]->(c)
+	(dirk_f_c)-[dirk_f_cc:runs_in]->(c)
 ----
 
 == Use the data

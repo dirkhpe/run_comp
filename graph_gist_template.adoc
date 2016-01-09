@@ -117,7 +117,7 @@ The result can be seen in the graph:
 But we want the result in a table, so that my 'point-assignment engine' assigns the points in sequence of finishing the race. This is not the case now:
 //table
 
-Let us try to add a path:
+Let us try to add a path and return the nodes on the path:
 
 [source,cypher]
 ----
@@ -125,7 +125,7 @@ MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
 (d)-[:race_category]->(g:RaceType {label: 'Main'}),
 p=(e)<-[:after*]-(f)
 WHERE (d)<-[:runs_in]-(e)
-RETURN p
+RETURN nodes(p)
 ----
 
 //graph_result

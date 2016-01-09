@@ -92,7 +92,9 @@ Count the number of finishers in the main race. Calculate the points for finishe
 
 [source,cypher]
 ----
-MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d)<-[:runs_in]-(e)<-[:participates]-(f)
+MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
+(d)-[:race_category]->(r:race_type {label: 'Main'}),
+(d)<-[:runs_in]-(e)<-[:participates]-(f)
 RETURN w,d,e,f
 ----
 

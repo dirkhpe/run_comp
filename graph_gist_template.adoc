@@ -57,7 +57,7 @@ CREATE
 	(d)-[rddr2:has_race]->(dr2),
 	(dr1)-[rdr1rtm1:race_category]->(rtm1),
 	(dr2)-[rdr2rtm2:race_category]->(rtm2),
-	(e:Organization {name: 'Bercheme - Bollekesloop'}),
+	(e:Organization {name: 'Berchem - Bollekesloop'}),
 	(er1:Race {label: '10k'}),
 	(er2:Race {label: '5k'}),
 	(e)-[reer1:has_race]->(er1),
@@ -76,7 +76,11 @@ CREATE
 	(dre_f_c)-[dre_f_cc:runs_in]->(c),
 	(louis_f_b)-[louis_f_cc:runs_in]->(b),
 	(luc_f_b)-[luc_f_bb:runs_in]->(b),
-	(dirk_f_c)-[dirk_f_cc:runs_in]->(c)
+	(dirk_f_c)-[dirk_f_cc:runs_in]->(c),
+	(johan_f_b)-[johan_f_bb:runs_in]->(b),
+	(louis_f_b)-[lfb_jfb:after]->(johan_f_b),
+	(luc_f_b)-[lucfb_lfb:after]->(louis_f_b),
+	(dirk_f_c)-[dfc_dfc:after]->(dre_f_c)
 ----
 
 == Use the data

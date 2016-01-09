@@ -111,9 +111,22 @@ MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
 RETURN w,d,e,f
 ----
 
+The result can be seen in the graph:
 //graph_result
 
+But we want the result in a table, so that my 'point-assignment engine' assigns the points in sequence of finishing the race. This is not the case now:
 //table
+
+Let us try to add a path:
+
+[source,cypher]
+----
+MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
+(d)-[:race_category]->(g:RaceType {label: 'Main'}),
+p=(e)<-[:after*]-(f)
+RETURN p
+----
+
 
 Update finishers - switch positions, add participants on the fly
 Add participants that are not part of the main competition.

@@ -32,7 +32,7 @@ image::http://www.vermeylen.net/Schema.svg[Schema]
 
 === Participants
 //setup
-//hide
+
 [source,cypher]
 ----
 CREATE
@@ -84,7 +84,7 @@ CREATE
 	(dirk_f_c)-[dfc_dfc:after]->(dre_f_c)
 ----
 
-//graph_result
+//graph
 
 == Use the data
 Use cases: Get the list of finishers in the main race in sequence. This allows to add points to the finisher. Rankings will be maintained in SQL table for now.

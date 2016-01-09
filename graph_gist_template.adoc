@@ -40,13 +40,7 @@ CREATE
 	(louis:Person {name: 'Louis'}),
 	(luc:Person {name: 'Luc'}),
 	(dirk:Person {name: 'Dirk'}),
-	(johan:Person {name: 'Johan'})
-----
-
-=== Some Organizations and races
-[source,cypher]
-----
-CREATE
+	(johan:Person {name: 'Johan'}),
 	(rtm1: RaceType {label: 'Main'}),
 	(rtm2: RaceType {label: 'Side'}),
 	(a:Organization {name: 'Lier - Halve Marathon'}),
@@ -69,13 +63,7 @@ CREATE
 	(e)-[reer1:has_race]->(er1),
 	(e)-[reer2:has_race]->(er2),
 	(er1)-[rer1rtm1:race_category]->(rtm1),
-	(er2)-[rer2rtm2:race_category]->(rtm2)
-----
-
-=== Results in races
-[source,cypher]
-----
-CREATE
+	(er2)-[rer2rtm2:race_category]->(rtm2),
 	(dre_f_c:Finisher {place: 21}),
 	(louis_f_c:Finisher {place: 36}),
 	(luc_f_b:Finisher {place: 72}),

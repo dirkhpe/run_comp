@@ -73,6 +73,7 @@ CREATE
 	(louis)-[louislouis_f_b:participates]->(louis_f_b),
 	(luc)-[lucluc_f_b:participates]->(luc_f_b),
 	(dirk)-[dirkdirk_f_c:participates]->(dirk_f_c),
+	(johan)-[johanjohan_f_b:participates]->(johan_f_b),
 	(dre_f_c)-[dre_f_cc:runs_in]->(c),
 	(louis_f_b)-[louis_f_cc:runs_in]->(b),
 	(luc_f_b)-[luc_f_bb:runs_in]->(b),
@@ -87,7 +88,17 @@ CREATE
 Use cases: Get the list of finishers in the main race in sequence. This allows to add points to the finisher. Rankings will be maintained in SQL table for now.
 Count the number of finishers in the main race. Calculate the points for finishers in side races.
 
+//setup
+//hide
+[source,cypher]
+----
+MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d)<-[:runs_in]-(e)<-[:participates]-(f)
+RETURN w,d,e,f
+----
+
+
 Update finishers - switch positions, add participants on the fly
+Add participants that are not part of the main competition.
 
 // REMOVEME: Display the whole graph:
 

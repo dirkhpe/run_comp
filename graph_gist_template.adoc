@@ -127,37 +127,14 @@ p=(e)<-[:after*]-(f)
 RETURN p
 ----
 
+//graph_result
+
+//table
+
 
 Update finishers - switch positions, add participants on the fly
 Add participants that are not part of the main competition.
 
-// REMOVEME: Display the whole graph:
-
-//graph
-
-// REMOVEME: Describe what this query is designed to do
-
-// REMOVEME: A Cypher query to give table output
-[source,cypher]
-----
-MATCH (a:Person {name: 'Alice'})-[:FRIENDS_WITH]-(:Person)-[:FRIENDS_WITH]-(fof:Person)
-RETURN fof.name
-----
-
-//table
-
-// REMOVEME: Describe what this query is designed to do
-
-// REMOVEME: A Cypher query to give graph visualization output
-[source,cypher]
-----
-MATCH path=(a:Person {name: 'Alice'})-[:FRIENDS_WITH]-(:Person)-[:FRIENDS_WITH]-(fof:Person)
-RETURN path
-----
-
-//graph_result
-
-// REMOVEME: Offer a conclusion
 == Conclusion
 
 Rankings per race and overall rankings are stored in a SQL table. For now it is unclear if it could be represented using nodes and if nodes would be easier to use.

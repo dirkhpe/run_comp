@@ -20,11 +20,6 @@ Sometimes people come and join to run the race, without being part of the compet
 People are represented by a person node. In most cases, a person node will be connected to a 'Name' node. For newcomers, we may not know exact (spelling of the) name. In these cases the name attribute of the Person node will be used. The 'Name' node needs to be correct, while the name attribute of the Person node is the best known representation at that time.
 
 For each participant finishing a race on our competition and for each sympathizer finishing, a finisher node will be created. Preferably a finisher node has position in the race and end-time, but the only bit of information really required is the relative position with respect to the other participants. This is sufficient information to calculate the points earned at the race. This approach allows to enter the data and discuss the new ranking while enjoying a beer and waiting for the official result.  
-// Provide a domain model image (using something like http://www.apcjones.com/arrows/# or https://www.gliffy.com/)
-
-// You can run this query to get an overview of entities and how they are related:
-// MATCH (a)-[r]->(b) WHERE labels(a) <> [] AND labels(b) <> []
-// RETURN DISTINCT head(labels(a)) AS This, type(r) as To, head(labels(b)) AS That LIMIT 10
 
 image::http://www.vermeylen.net/Schema.svg[Schema]
 
@@ -101,6 +96,21 @@ RETURN w,g,d,f,e
 
 //table
 
+OK, but patterns are the key of graph databases. Add pattern-names as documentation to above statement and use readable node identifiers.
+[source,cypher]
+----
+MATCH races_in_Lier = (organization:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(race),
+race_types = (race)-[:race_category]->(type:RaceType),
+finishers = (race)<-[:runs_in]-(finisher)<-[:participates]-(person)
+RETURN organization, race, type, finisher, person
+----
+
+//graph_result
+
+//table
+
+
+
 Now we need to calculate points for the finishers. Therefore we need to get the finishers in main race first, in sequence of arrival.
 
 [source,cypher]
@@ -121,23 +131,59 @@ Let us try to add a path and return the nodes on the path:
 
 [source,cypher]
 ----
-MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
-(d)-[:race_category]->(g:RaceType {label: 'Main'}),
-p=(e)<-[:after*]-(f)
-WHERE (d)<-[:runs_in]-(e)
-RETURN nodes(p)
+MATCH races_in_Lier = (organization:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(race),
+main_race = (race)-[:race_category]->(g:RaceType {label: 'Main'}),
+finishers = (finisher)<-[:after*]-()
+WHERE (race)<-[:runs_in]-(finisher)
+WITH COLLECT(finishers) AS results, MAX(length(finishers)) AS maxLength
+WITH FILTER(result IN results WHERE length(result) = maxLength) AS result_coll
+UNWIND result_coll AS result
+RETURN nodes(result)
 ----
 
 //graph_result
 
 //table
 
+This will show all paths (2 paths with two nodes, one path with 3 nodes). We need to find full (longest) path.
+
 Will this work if there is only 1 participant? Or if there are no participants?
 
 Update finishers - switch positions, add participants on the fly
 Add participants that are not part of the main competition.
 
+== Add data for the next race
+
+=== Merge participants
+For the Bollekesloop, I want to add the participants to the Main race (10k). Merge is used to create or match each participant. 
+
+[source,cypher]
+----
+MERGE (johan:Person {name: 'Johan'}) 
+MERGE (luc:Person {name: 'Luc'})
+MERGE (gert:Person {name: 'Gert'})
+MERGE (stefan:Person {name: 'Stefan'})
+WITH johan, luc, gert, stefan
+MATCH (organization:Organization {name: 'Berchem - Bollekesloop'})-[:has_race]->(race),
+(race)-[:race_category]->(g:RaceType {label: 'Main'})
+CREATE (race)<-[:runs_in]-(f_johan:Finisher {place: 14})<-[:participates]-(johan),
+(race)<-[:runs_in]-(f_luc:Finisher {place: 15})<-[:participates]-(luc),
+(race)<-[:runs_in]-(f_gert:Finisher {place: 62})<-[:participates]-(gert),
+(race)<-[:runs_in]-(f_stefan:Finisher {place: 114})<-[:participates]-(stefan),
+(f_stefan)-[:after]->(f_gert)-[:after]->(f_luc)-[:after]->(f_johan)
+RETURN johan,luc,gert,stefan,f_johan,f_luc,f_gert,f_stefan,race,organization
+----
+
+//graph_result
+
+//table
+
+
+
+
 == Conclusion
+
+Sequence of arrival is determined using the 'after' relation. At the end of a race, this is the only known attribute and that is sufficient to calculate the new overall ranking. Later on when more information (e.g. place of each finisher in the race) comes available, this can be added to the database.
 
 Rankings per race and overall rankings are stored in a SQL table. For now it is unclear if it could be represented using nodes and if nodes would be easier to use.
 

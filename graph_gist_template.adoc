@@ -17,7 +17,7 @@ Sometimes people come and join to run the race, without being part of the compet
 
 In reverse, sometimes members of the club choose to run the race but not to participate in the competition and thus leave the high points (50 - 45) for the others. This is done by not wearing your club shirt during the race. 
 
-It would be nice to have a website displaying the race results and the overall ranking as soon as possible after the race. The plan is to use Graphgist to build and validate a model, then use Neo4J  and Flask to build the website. The 'Building Web Apps Using Flask and Neo4j' has been a convincing introduction there.
+It would be nice to have a website displaying the race results (related to the our competition) and the overall ranking as soon as possible after the race. The plan is to use Graphgist to build and validate a model, then use Neo4J  and Flask to build the website. The *Building Web Apps Using Flask and Neo4j* training has been a convincing introduction there.
 
 === The Model
 
@@ -25,7 +25,7 @@ Each organization is represented as a node, linked to the location and the date.
 
 The model has a Competition Node ('Summer Races 2015', 'Summer Races 2014', ...). People that are member of the club automatically participate in the competition, on condition that they are older than 12 years.
 
-People are represented by a person node. In most cases, a person node will be connected to a 'Name' node. For newcomers, we may not know exact (spelling of the) name. In these cases the name attribute of the Person node will be used. The 'Name' node needs to be correct, while the name attribute of the Person node is the best known representation at that time.
+People are represented by a person node. In most cases, a person node will be connected to a 'Name' node. For newcomers, we may not know exact (spelling of the) name. In this case the name attribute of the Person node will be used. The 'Name' node needs to be correct, while the name attribute of the Person node is the best known representation at that time.
 
 For each participant finishing a race on our competition and for each sympathizer finishing, a finisher node will be created. Preferably a finisher node has position in the race and end-time, but the only bit of information really required is the relative position with respect to the other participants. This is sufficient information to calculate the points earned at the race. This approach allows to enter the data and discuss the new ranking while enjoying a beer and waiting for the official result.  
 
@@ -117,7 +117,7 @@ RETURN organization, race, type, finisher, person
 
 Now we need to get sufficient information to be able to calculate points for the finishers. Therefore we need to get the finishers in main race first, in sequence of arrival.
 
-The first attempt provided too much information:
+The first attempt provides too much information:
 [source,cypher]
 ----
 MATCH races_in_Lier = (organization:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(race),
@@ -149,7 +149,7 @@ RETURN nodes(result)
 
 //table
 
-OK, this provides one row of data as required so the web application will be able to handle it. However neo4j browser is not happy about the cartesian product on the (finisher) node. The query needs to be reconfigured to:
+OK, this provides one row of data as required so the web application will be able to handle it. However neo4j browser is not happy about the cartesian product on the (finisher) node. The query needs to be reconfigured to add a match line for participants. This makes the connection between races and finishers:
 
 [source,cypher]
 ----
@@ -312,6 +312,7 @@ There are a number of extensions scheduled for the web application:
 * Add other disciplines... 
 
 This graphgist document should also be extended:
+
 * Add names to the finishers. Not required for the web application, but it would be nice as a showcase.
 * Any other query improvement.
 

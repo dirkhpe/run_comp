@@ -5,29 +5,45 @@
 // Provide an introduction to your data modeling domain and what you are trying to accomplish
 == The Domain
 
-We love to go running and challenge each other. Therefore a little competition has been set-up. A number of running organizations are selected. For each organization one race is picked as the main race, while the other races are side races. 
+=== Description
+We love to go running and challenge each other. Therefore a little competition has been set-up. A number of running organizations are selected. For each organization one race is assigend as the main race, while the other races are side races. 
+
+For the participants on our little competition, the first finisher on the main race gets 50 points, the second finisher 45, third finisher 40, then 39, 38, ... for subsequent finishers. 
+All participants on the side races get the same number of points. The amount of points is as if they were next after the last finisher in the main competition.
+
+So for example 5 participants on the main competition will get 50, 45, 40, 39 and 38 points. Every participant in the side competition then will get 37 points. If there are no participants on the main race, then everyone on side races will get 50 points.
+
+Sometimes people come and join to run the race, without being part of the competition. This is the case for people interested in joining the club next year (hang-arounds in Hells Angels terminology), or people that are a bit late with membership fee. We want to remember their race result to display in the weekly Club Gazette or to change their status to participant and recalculate points as soon as they are member of the club. 
+
+In reverse, sometimes members of the club choose to run the race but not to participate in the competition and thus leave the high points (50 - 45) for the others. This is done by not wearing your club shirt during the race. 
+
+It would be nice to have a website displaying the race results and the overall ranking as soon as possible after the race. The plan is to use Graphgist to build and validate a model, then use Neo4J  and Flask to build the website. The 'Building Web Apps Using Flask and Neo4j' has been a convincing introduction there.
+
+=== The Model
 
 Each organization is represented as a node, linked to the location and the date. Each organization then has a main race (e.g. 10 miles) and side races (10 k, 5 k, 21k, ...)
 
-For the participants on our little competition, the first finisher on the main race gets 50 points, the second finisher 45, third finisher 40, then 39, 38, ... for subsequent finishers. 
-
-For participants on the side races, you take the points of the last finisher of the main race and subtract one. Each participant of the side race gets the same number of points.
-
 The model has a Competition Node ('Summer Races 2015', 'Summer Races 2014', ...). People that are member of the club automatically participate in the competition, on condition that they are older than 12 years.
-
-Sometimes people come and join to run the race, without being part of the competition. This is the case for people interested in joining the club next year (Hell's Angels would describe them as hang-arounds), or people that are no longer a member of the club. These people need to show up in the Race Result list that is extracted for the weekly club gazette. 
 
 People are represented by a person node. In most cases, a person node will be connected to a 'Name' node. For newcomers, we may not know exact (spelling of the) name. In these cases the name attribute of the Person node will be used. The 'Name' node needs to be correct, while the name attribute of the Person node is the best known representation at that time.
 
 For each participant finishing a race on our competition and for each sympathizer finishing, a finisher node will be created. Preferably a finisher node has position in the race and end-time, but the only bit of information really required is the relative position with respect to the other participants. This is sufficient information to calculate the points earned at the race. This approach allows to enter the data and discuss the new ranking while enjoying a beer and waiting for the official result.  
+
+This graphgist will focus configuring some organizations with races, adding races to categories (main - side race), defining some people and add them as finisher to the race.
+
+The main purpose of the exercise is to extract the list of finishers in sequence of arrival. The Flask (Python) application can then easily calculate points per participants for the race and come up with overall rankings.
 
 image::http://www.vermeylen.net/Schema.svg[Schema]
 
 == Add some data
 
 === Participants
-//setup
+First we will define some organizations, races and participants. Once we have some data in the database, it is a lot easier to see what is going on. 
 
+Note that for each finisher the place in the race will be shown. However this is information that is not necessarily available, so it will not be used for processing.
+
+//setup
+//hide
 [source,cypher]
 ----
 CREATE
@@ -82,21 +98,11 @@ CREATE
 //graph
 
 == Use the data
-Get the list of all finishers for a specific organization. 
 
-[source,cypher]
-----
-MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
-(d)-[:race_category]->(g:RaceType),
-(d)<-[:runs_in]-(e)<-[:participates]-(f)
-RETURN w,g,d,f,e
-----
+=== Get the finishers
 
-//graph_result
+Now lets use patterns to get the list of all finishers for a specific organization. The usage of patterns improves readability of the queries.
 
-//table
-
-OK, but patterns are the key of graph databases. Add pattern-names as documentation to above statement and use readable node identifiers.
 [source,cypher]
 ----
 MATCH races_in_Lier = (organization:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(race),
@@ -109,25 +115,23 @@ RETURN organization, race, type, finisher, person
 
 //table
 
+Now we need to get sufficient information to be able to calculate points for the finishers. Therefore we need to get the finishers in main race first, in sequence of arrival.
 
-
-Now we need to calculate points for the finishers. Therefore we need to get the finishers in main race first, in sequence of arrival.
-
+The first attempt provided too much information:
 [source,cypher]
 ----
-MATCH (w:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(d),
-(d)-[:race_category]->(g:RaceType {label: 'Main'}),
-(d)<-[:runs_in]-(e)<-[:participates]-(f)
-RETURN w,d,e,f
+MATCH races_in_Lier = (organization:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(race),
+main_race = (race)-[:race_category]->(g:RaceType {label: 'Main'}),
+finishers = (finisher)<-[:after*]-()
+WHERE (race)<-[:runs_in]-(finisher)
+RETURN finishers
 ----
 
-The result can be seen in the graph:
 //graph_result
 
-But we want the result in a table, so that my 'point-assignment engine' assigns the points in sequence of finishing the race. This is not the case now:
 //table
 
-Let us try to add a path and return the nodes on the path:
+The graph is OK, but the table provides rows for the partial paths '36 after 7' and '72 after 36'. This is not required. We want the full path only for processing in the web application. Therefore the query is extended with a collection of all paths, get the maximum length of the path then filter the paths on the longest path only. In this model there is only one longest path and it is the one required.
 
 [source,cypher]
 ----
@@ -145,17 +149,23 @@ RETURN nodes(result)
 
 //table
 
-This will show all paths (2 paths with two nodes, one path with 3 nodes). We need to find full (longest) path.
+OK, this provides one row of data as required so the web application will be able to handle it. However neo4j browser is not happy about the cartesian product on the (finisher) node. The query needs to be reconfigured to:
 
-Will this work if there is only 1 participant? Or if there are no participants?
+[source,cypher]
+----
+MATCH races_in_Lier = (organization:Organization {name: 'Lier - Halve Marathon'})-[:has_race]->(race),
+main_race = (race)-[:race_category]->(g:RaceType {label: 'Main'}),
+participants = (race)<-[:runs_in]-(finisher),
+finishers = (finisher)<-[:after*]-()
+WITH COLLECT(finishers) AS results, MAX(length(finishers)) AS maxLength
+WITH FILTER(result IN results WHERE length(result) = maxLength) AS result_coll
+UNWIND result_coll AS result
+RETURN nodes(result)
+----
 
-Update finishers - switch positions, add participants on the fly
-Add participants that are not part of the main competition.
+=== Add data for the next race
 
-== Add data for the next race
-
-=== Merge participants
-For the Bollekesloop, I want to add the participants to the Main race (10k). Merge is used to create or match each participant. 
+Now participants will be added for the Main race (10k) of the next organization. Merge is used to create or match each participant. 
 
 [source,cypher]
 ----
@@ -176,19 +186,129 @@ RETURN johan,luc,gert,stefan,f_johan,f_luc,f_gert,f_stefan,race,organization
 
 //graph_result
 
+I want to verify that the query above to get all finishers on a race can be re-used. The only change required is the name of the organization:
+
+[source,cypher]
+----
+MATCH races_in_Berchem = (organization:Organization {name: 'Berchem - Bollekesloop'})-[:has_race]->(race),
+main_race = (race)-[:race_category]->(g:RaceType {label: 'Main'}),
+participants = (race)<-[:runs_in]-(finisher),
+finishers = (finisher)<-[:after*]-()
+WITH COLLECT(finishers) AS results, MAX(length(finishers)) AS maxLength
+WITH FILTER(result IN results WHERE length(result) = maxLength) AS result_coll
+UNWIND result_coll AS result
+RETURN nodes(result)
+----
+
+//graph_result
+
 //table
 
+=== Special Cases
 
+==== Single person as finisher
 
+Some special cases need to be verified: a main race with only one participant and a main race with no participants.
+Next query will add one participant for main race in Deurne:
+[source,cypher]
+----
+MERGE (luc:Person {name: 'Luc'})
+WITH luc
+MATCH (organization:Organization {name: 'Deurne - Rivierenhofloop'})-[:has_race]->(race),
+(race)-[:race_category]->(g:RaceType {label: 'Main'})
+CREATE (race)<-[:runs_in]-(f_luc:Finisher {place: 18})<-[:participates]-(luc)
+RETURN luc,f_luc, race,organization
+----
+
+//graph_result
+
+So Luc deserves the 50 points for this race. However will he show up in in the query?
+[source,cypher]
+----
+MATCH races_in_Berchem = (organization:Organization {name: 'Deurne - Rivierenhofloop'})-[:has_race]->(race),
+main_race = (race)-[:race_category]->(g:RaceType {label: 'Main'}),
+participants = (race)<-[:runs_in]-(finisher),
+finishers = (finisher)<-[:after*]-()
+WITH COLLECT(finishers) AS results, MAX(length(finishers)) AS maxLength
+WITH FILTER(result IN results WHERE length(result) = maxLength) AS result_coll
+UNWIND result_coll AS result
+RETURN nodes(result)
+----
+
+//graph_result
+Not in this query. Apparantly relation [:after*] insists on having at least one link by default. Modifying the relation to [:after*0..] is better:
+[source,cypher]
+----
+MATCH races_in_Berchem = (organization:Organization {name: 'Deurne - Rivierenhofloop'})-[:has_race]->(race),
+main_race = (race)-[:race_category]->(g:RaceType {label: 'Main'}),
+participants = (race)<-[:runs_in]-(finisher),
+finishers = (finisher)<-[:after*0..]-()
+WITH COLLECT(finishers) AS results, MAX(length(finishers)) AS maxLength
+WITH FILTER(result IN results WHERE length(result) = maxLength) AS result_coll
+UNWIND result_coll AS result
+RETURN nodes(result)
+----
+//graph_result
+
+//table
+
+But now I have the single finisher twice. Not sure why (yet), but the web application can handle it. 
+
+==== No finishers
+
+In case of no finishers, I want to have an empty result set. This check is to find out if no unexpected error will show up. Therefore another race will be added. Note that the neo4j browser will warn about the cartesian product between disconnected patterns, but in this case this is what we want to have.
+[source,cypher]
+----
+MATCH (main: RaceType {label: 'Main'}),
+	  (side: RaceType {label: 'Side'})
+CREATE (organization:Organization {name: 'Mechelen - RAM'}),
+	(mainrace:Race {label: '10k'}),
+	(siderace:Race {label: '5k'}),
+	(organization)-[:has_race]->(mainrace),
+	(organization)-[:has_race]->(siderace),
+	(mainrace)-[:race_category]->(main),
+	(siderace)-[:race_category]->(side)
+RETURN organization, mainrace, siderace, main, side
+----
+
+//graph_result
+
+Now check if the query to get the list of finishers returns an empty dataset:
+
+[source,cypher]
+----
+MATCH races_in_Mechelen = (organization:Organization {name: 'Mechelen - RAM'})-[:has_race]->(race),
+main_race = (race)-[:race_category]->(g:RaceType {label: 'Main'}),
+participants = (race)<-[:runs_in]-(finisher),
+finishers = (finisher)<-[:after*0..]-()
+WITH COLLECT(finishers) AS results, MAX(length(finishers)) AS maxLength
+WITH FILTER(result IN results WHERE length(result) = maxLength) AS result_coll
+UNWIND result_coll AS result
+RETURN nodes(result)
+----
+//graph_result
+
+//table
+
+OK, the empty dataset is the expected result.
 
 == Conclusion
 
-Sequence of arrival is determined using the 'after' relation. At the end of a race, this is the only known attribute and that is sufficient to calculate the new overall ranking. Later on when more information (e.g. place of each finisher in the race) comes available, this can be added to the database.
+Sequence of arrival is determined using the 'after' relation. At the end of a race, this is the only known attribute and that is sufficient to calculate the new overall ranking. Later on when more information (e.g. place of each finisher in the race) comes available, this can be added to the database. This datamodel is proof of concept to start building the web application in Flask.
 
-Rankings per race and overall rankings are stored in a SQL table. For now it is unclear if it could be represented using nodes and if nodes would be easier to use.
+There are a number of extensions scheduled for the web application:
+* Add Female / Male categories. 
+* Further expand categories for Cross Country running:
+** Under-16
+** Under-23
+** Senior
+** Master
+** Master +50
+* Add other disciplines... 
 
-However the rule implementations is a lot more flexible in Graph mode compared to traditional SQL representation. 
-The expectation with the Graph mode is that it will be easier to extend the model to include the crosses in the Winter competition. During winter there female / male split-up is extended to include age-ranges: Under-16 - Youth - Junior - Under-23 - Senior - Master - Master+50.
-Another extension would be to add points based on track and field disciplines.
+This graphgist document should also be extended:
+* Add names to the finishers. Not required for the web application, but it would be nice as a showcase.
+* Any other query improvement.
 
-This Graphgist approach is very flexible to build prototypes. Next step is to build a flask website and start using the application.
+Rankings per race and overall rankings will be stored in a SQL (sqlite) table. For now it is unclear if it could be represented using a graph database. Also I'm not sure if graph database would be easier than SQL table for this particular usage.
+

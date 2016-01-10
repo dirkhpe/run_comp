@@ -252,7 +252,7 @@ RETURN nodes(result)
 
 //table
 
-But now I have the single finisher twice. Not sure why (yet), but the web application can handle it. 
+OK, this is the expected result.
 
 ==== No finishers
 
@@ -292,11 +292,16 @@ RETURN nodes(result)
 
 OK, the empty dataset is the expected result.
 
+This is the database at the end of the exercise:
+
+//graph
+
 == Conclusion
 
 Sequence of arrival is determined using the 'after' relation. At the end of a race, this is the only known attribute and that is sufficient to calculate the new overall ranking. Later on when more information (e.g. place of each finisher in the race) comes available, this can be added to the database. This datamodel is proof of concept to start building the web application in Flask.
 
 There are a number of extensions scheduled for the web application:
+
 * Add Female / Male categories. 
 * Further expand categories for Cross Country running:
 ** Under-16

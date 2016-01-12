@@ -6,6 +6,7 @@
 == The Domain
 
 === Description
+
 We love to go running and challenge each other. Therefore a little competition has been set-up. A number of running organizations are selected. For each organization one race is assigend as the main race, while the other races are side races. 
 
 For the participants on our little competition, the first finisher on the main race gets 50 points, the second finisher 45, third finisher 40, then 39, 38, ... for subsequent finishers. 

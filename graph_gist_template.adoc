@@ -9,12 +9,12 @@
 
 We love to go running and challenge each other. Therefore a little competition has been set up. A number of running organizations are selected. For each organization one race is assigned as the main race, while the other races are side races. 
 
-For the participants in our little competition, the first finisher in the main race gets 50 points, the second finisher 45, the third finisher 40, then 39, 38, ... for subsequent finishers. 
-All participants on the side races get the same number of points. The amount of points is as if they were next after the last finisher in the main competition.
+For the participants in our little competition, the first finisher in the main race gets 50 points, the second finisher 45, the third finisher 40, then 39, 38, ... for subsequent finishers. +
+All participants in the side races get the same number of points. The amount of points is as if they were next after the last finisher in the main competition.
 
-So for example 5 participants on the main competition will get 50, 45, 40, 39 and 38 points. Every participant in the side competition then will get 37 points. If there are no participants on the main race, then everyone on side races will get 50 points.
+So for example 5 participants in the main competition will get 50, 45, 40, 39 and 38 points. Every participant in the side competition then will get 37 points. If there are no participants in the main race, then everyone on side races will get 50 points.
 
-Sometimes people come and join to run the race, without being part of the competition. This is the case for people interested in joining the club next year (hang-arounds in Hells Angels terminology), or people who are a bit late with membership fee. We want to remember their race result to display in the weekly Club Gazette or to change their status to participant and recalculate points as soon as they are a club member. 
+Sometimes people come and join to run the race, without being part of the competition. This is the case for people interested in joining the club next year, or people who are a bit late with membership fee. We want to remember their race result to display in the weekly Club Gazette or to change their status to participant and recalculate points as soon as they are a club member. 
 
 In reverse, sometimes club members choose to run the race but not to participate in the competition and thus leave the high points (50 - 45) to the others. This is done by not wearing your club shirt during the race. 
 
@@ -28,7 +28,7 @@ The model has a Competition Node ('Summer Races 2015', 'Summer Races 2014', ...)
 
 People are represented by a person node. In most cases, a person node will be connected to a 'Name' node. For newcomers, whose name we may not know exact, the name attribute of the Person node will be used. The 'Name' node needs to be correct, while the name attribute of the Person node is the best known representation at that time.
 
-For each participant finishing a race in our competition and for each sympathizer finishing, a finisher node will be created. Preferably a finisher node has position in the race and end-time, but the only bit of information really required is the relative position with respect to the other participants. This is sufficient information to calculate the points earned at the race. This approach allows to enter the data and discuss the new ranking while enjoying a beer and waiting for the official result.  
+For each participant finishing a race in our competition and for each sympathizer finishing, a finisher node will be created. Preferably a finisher node has the position in the race and the end-time, but the only bit of information really required is the relative position with respect to the other participants. This is sufficient information to calculate the points earned at the race. This approach allows to enter the data immediately after the race and discuss the new ranking while enjoying a beer and waiting for the official result.  
 
 This graphgist will focus configuring some organizations with races, adding races to categories (main - side race), defining some people and add them as finisher to the race.
 
@@ -216,9 +216,9 @@ The next query will add one participant for a main race in Deurne:
 MERGE (luc:Person {name: 'Luc'})
 WITH luc
 MATCH (organization:Organization {name: 'Deurne - Rivierenhofloop'})-[:has_race]->(race),
-(race)-[:race_category]->(g:RaceType {label: 'Main'})
+(race)-[:race_category]->(racetype:RaceType {label: 'Main'})
 CREATE (race)<-[:runs_in]-(f_luc:Finisher {place: 18})<-[:participates]-(luc)
-RETURN luc,f_luc, race,organization
+RETURN luc, f_luc, race, racetype, organization
 ----
 
 //graph_result
@@ -299,7 +299,7 @@ This is the database at the end of the exercise:
 
 == Conclusion
 
-Sequence of arrival is determined using the 'after' relation. At the end of a race, this is the only known attribute and that is sufficient to calculate the new overall ranking. Later on when more information (e.g. place of each finisher in the race) is available, this can be added in the database. This datamodel is proof of concept to start building the web application in Flask.
+The sequence of arrival is determined using the 'after' relation. Immediately after the end of each race, this is the bit of information available. However this is sufficient to calculate the new overall ranking. Later on when more information (e.g. place and time of each finisher in the race) is available, this can be added in the database. This datamodel is a proof of concept to start building the web application in Flask.
 
 There are a number of extensions scheduled for the web application:
 
@@ -310,7 +310,7 @@ There are a number of extensions scheduled for the web application:
 ** Senior
 ** Master
 ** Master +50
-* Add other disciplines... 
+* Add other athletics disciplines... 
 
 This graphgist document should also be extended to:
 
